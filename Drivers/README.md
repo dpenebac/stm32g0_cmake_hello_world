@@ -1,0 +1,1 @@
+Obtained from : https://github.com/STMicroelectronics/STM32CubeG0
