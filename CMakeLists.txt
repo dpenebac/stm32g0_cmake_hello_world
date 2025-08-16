@@ -64,7 +64,7 @@ set (PROJECT_INCLUDES
 	# LIST INCLUDE DIRECTORIES HERE
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Device/ST/STM32G0xx/Include
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include
-    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/STM32G0xx_HAL_Driver/Include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/STM32G0xx_HAL_Driver/Inc
     )
 
 ############ MODIFY ACCORDING TO REQUIREMENTS) ########################
