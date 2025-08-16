@@ -78,6 +78,16 @@ enable_language(ASM)
 if (${PROJECT_TYPE} MATCHES ${PROJECT_TYPE_EXECUTABLE})
   add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
   add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${CMAKE_PROJECT_NAME}>)
+  
+  # Dorien Addition : Custom command to build binary file
+  add_custom_command(TARGET ${CMAKE_PROJECT_NAME}
+    POST_BUILD
+    COMMAND arm-none-eabi-objcopy -O binary
+            $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.bin
+    COMMENT "Generating binary file ${PROJECT_NAME}.bin"
+  )
+
 elseif (${PROJECT_TYPE} MATCHES ${PROJECT_TYPE_STATIC_LIBRARY})
   add_library(${PROJECT_NAME} ${PROJECT_SOURCES})
 endif()
