@@ -47,7 +47,7 @@
 #define configTICK_RATE_HZ                      (1000UL)       // 1 ms per tick
 #define configMAX_PRIORITIES                    5
 #define configMINIMAL_STACK_SIZE                ( ( uint16_t ) 128 )
-#define configTOTAL_HEAP_SIZE                   ( ( size_t ) ( 2 * 1024 ) )
+#define configTOTAL_HEAP_SIZE                   ( ( size_t ) ( 4 * 1024 ) )
 #define configMAX_TASK_NAME_LEN                 16
 #define configUSE_16_BIT_TICKS                  0
 #define configIDLE_SHOULD_YIELD                 1
@@ -100,6 +100,7 @@ API only runs when the scheduler is suspended. The following settings are
 typical for Cortex-M processors. */
 /* Important: The lowest priority is actually 255. The maximum priority is 0. */
 /* See http://www.freertos.org/RTOS-Cortex-M3-M4.html for details. */
+#define configPRIO_BITS                         2 // define num of priority bits used by hardware
 #define configKERNEL_INTERRUPT_PRIORITY         (255) /* Equivalent to 0xFF */
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    (192) /* Equivalent to 0xC0 */
 

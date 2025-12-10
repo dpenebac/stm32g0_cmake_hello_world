@@ -30,8 +30,23 @@ once in container, to build .bin
 arm-none-eabi-objcopy -O binary cmake_test.elf cmake_test.bin
 ```
 
-to copy builds from docker to regular file system
+To get debugging working?
 
 ```
-docker cp 733882269c04:/workspace/build C:\Users\d\Desktop\git\cmake_test_env\build
+# Build with debug
+mkdir -p debug
+cd debug
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=../cubeide-gcc.cmake ..
+make -j32
+
+# Run openocd in WINDOWS TERMINAL
+# I have no idea where those files are / if they exist but it worked
+openocd -f interface/stlink.cfg -f target/stm32g0x.cfg
+
+# Back in docker
+# Start GDB / Load symbols
+arm-none-eabi-gdb
+(gdb) file /workspace/debug/cmake_test.elf
+# Connect to Openocd server
+(gdb) target extended-remote host.docker.internal:3333 # since in docker need to expose
 ```

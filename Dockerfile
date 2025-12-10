@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     ninja-build \
     wget \
     unzip \
+    libncurses5 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install ARM GCC toolchain
