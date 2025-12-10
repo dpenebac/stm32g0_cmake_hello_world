@@ -36,11 +36,34 @@ static void led_task(void *argument)
     }
 }
 
+/* ---------------- Simple Blocking Delay (approx 100ms at 16MHz) ---------------- */
+// This function is for testing *before* the RTOS is running.
+static void simple_delay(uint32_t count)
+{
+    // Adjust this loop count based on your clock speed for a visible delay
+    for (volatile uint32_t i = 0; i < count; i++);
+}
+
+
 /* ---------------- Main ---------------- */
 int main(void)
 {
     /* Initialize GPIO before scheduler */
     GPIO_Init();
+
+    // ---------------------------------------------
+    // ⭐ MANUAL BLINK TEST (5 times) ⭐
+    // ---------------------------------------------
+    for (int i = 0; i < 5; i++) {
+        // Toggle PC6 ON
+        GPIOC->ODR |= (1U << LED_PIN); 
+        simple_delay(200000); // 200,000 loop iterations delay
+
+        // Toggle PC6 OFF
+        GPIOC->ODR &= ~(1U << LED_PIN); 
+        simple_delay(200000); // 200,000 loop iterations delay
+    }
+    // ---------------------------------------------
 
     /* Create LED task */
     xTaskCreate(
