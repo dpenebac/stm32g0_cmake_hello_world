@@ -29,3 +29,9 @@ once in container, to build .bin
 ```
 arm-none-eabi-objcopy -O binary cmake_test.elf cmake_test.bin
 ```
+
+to copy builds from docker to regular file system
+
+```
+docker cp 733882269c04:/workspace/build C:\Users\d\Desktop\git\cmake_test_env\build
+```

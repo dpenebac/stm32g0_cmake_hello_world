@@ -75,8 +75,15 @@ set (PROJECT_INCLUDES
 project(${PROJECT_NAME})
 enable_language(ASM)
 
+# Manual addition to add FreeRTOS
+add_subdirectory(freertos)
+
 if (${PROJECT_TYPE} MATCHES ${PROJECT_TYPE_EXECUTABLE})
   add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+
+  # Manual addition to add FreeRTOS
+  target_link_libraries(${PROJECT_NAME} PRIVATE freertos)
+
   add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${CMAKE_PROJECT_NAME}>)
   
   # Dorien Addition : Custom command to build binary file
