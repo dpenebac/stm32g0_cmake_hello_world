@@ -1,86 +1,62 @@
 #include "stm32g031xx.h"
-#include <stdint.h>
+#include "FreeRTOS.h"
+#include "task.h"
 
-/* -------- Pins -------- */
-#define TRIG_PIN    0   // PA0 -> HC-SR04 TRIG (MCU output, 3V3 OK)
-#define ECHO_PIN    1   // PA1 -> HC-SR04 ECHO (needs level shift to 3V3!)
-#define LED_PIN     6   // PC6 LED
+#define LED_PIN 6   // PC6
 
-/* -------- SysTick: 1 us tick @ 16 MHz -------- */
-static void SysTick_Init(void) {
-    SysTick->LOAD = (16000000/1000000) - 1;  // 1 us
-    SysTick->VAL  = 0;
-    SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_ENABLE_Msk;
-}
+/* ---------------- GPIO Init (PC6 output) ---------------- */
+static void GPIO_Init(void)
+{
+    /* Enable GPIOC clock */
+    RCC->IOPENR |= RCC_IOPENR_GPIOCEN;
 
-static void delay_us(uint32_t us) {
-    for (uint32_t i = 0; i < us; i++) {
-        while (!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)) { /* wait 1 us */ }
-    }
-}
+    /* PC6 = output mode (01) */
+    GPIOC->MODER &= ~(3U << (LED_PIN * 2));
+    GPIOC->MODER |=  (1U << (LED_PIN * 2));
 
-/* -------- GPIO init -------- */
-static void GPIO_Init(void) {
-    /* Enable GPIOA / GPIOC clocks */
-    RCC->IOPENR |= RCC_IOPENR_GPIOAEN | RCC_IOPENR_GPIOCEN;
-
-    /* PA0 (TRIG) as output, push-pull */
-    GPIOA->MODER &= ~(3U << (TRIG_PIN*2));
-    GPIOA->MODER |=  (1U << (TRIG_PIN*2));
-    GPIOA->OTYPER &= ~(1U << TRIG_PIN);
-
-    /* PA1 (ECHO) as input */
-    GPIOA->MODER &= ~(3U << (ECHO_PIN*2));
-
-    /* PC6 (LED) as output, push-pull */
-    GPIOC->MODER &= ~(3U << (LED_PIN*2));
-    GPIOC->MODER |=  (1U << (LED_PIN*2));
+    /* Push-pull */
     GPIOC->OTYPER &= ~(1U << LED_PIN);
+
+    /* Medium speed */
+    GPIOC->OSPEEDR |=  (1U << (LED_PIN * 2));
+
+    /* No pull-up/down */
+    GPIOC->PUPDR &= ~(3U << (LED_PIN * 2));
 }
 
-/* -------- HC-SR04 read (polling) --------
-   Returns distance in cm (0 on timeout) */
-static uint32_t HCSR04_Read(void) {
-    /* 1) 10 us TRIG pulse */
-    GPIOA->ODR &= ~(1U << TRIG_PIN);
-    delay_us(2);
-    GPIOA->ODR |=  (1U << TRIG_PIN);
-    delay_us(10);
-    GPIOA->ODR &= ~(1U << TRIG_PIN);
+/* ---------------- LED Blinky Task ---------------- */
+static void led_task(void *argument)
+{
+    (void)argument;
 
-    /* 2) Wait for ECHO high (timeout ~30 ms) */
-    uint32_t timeout_us = 30000;
-    while (!(GPIOA->IDR & (1U << ECHO_PIN))) {
-        if (timeout_us-- == 0) return 0;
-        delay_us(1);
+    for (;;)
+    {
+        GPIOC->ODR ^= (1U << LED_PIN);       // Toggle PC6
+        vTaskDelay(pdMS_TO_TICKS(500));      // 500 ms delay
     }
-
-    /* 3) Measure ECHO high width (max ~30 ms ≈ >5 m) */
-    uint32_t width_us = 0;
-    while (GPIOA->IDR & (1U << ECHO_PIN)) {
-        if (width_us++ > 30000) break;
-        delay_us(1);
-    }
-
-    /* 4) Convert time-of-flight to cm: us / 58 */
-    return width_us / 58U;
 }
 
-int main(void) {
-    SysTick_Init();
+/* ---------------- Main ---------------- */
+int main(void)
+{
+    /* Initialize GPIO before scheduler */
     GPIO_Init();
 
-    while (1) {
-        uint32_t dist_cm = HCSR04_Read();
+    /* Create LED task */
+    xTaskCreate(
+        led_task,
+        "LED",
+        128,
+        NULL,
+        1,
+        NULL
+    );
 
-        /* LED on PC6: ON if object < 10 cm, else OFF */
-        if (dist_cm < 10) {
-            GPIOC->ODR |=  (1U << LED_PIN);   // PC6 = 1
-        } else {
-            GPIOC->ODR &= ~(1U << LED_PIN);   // PC6 = 0
-        }
+    /* Start FreeRTOS scheduler (never returns) */
+    vTaskStartScheduler();
 
-        /* Minimum ~60 ms between measurements to avoid ring/echo */
-        delay_us(60000);
+    /* Should never reach here */
+    while (1)
+    {
     }
 }
