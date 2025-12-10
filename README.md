@@ -3,14 +3,14 @@
 docker build -t stm32-cmake .
 ```
 
-project path : C:\Users\d\STM32CubeIDE\workspace_1.19.0\cmake_test
+project path : C:\Users\d\Desktop\git\cmake_test_env
 
 ```
 docker run --rm -it -v ~/{project_path}:/workspace stm32-cmake bash
 ```
 
 ```
-docker run --rm -it -v "C:\Users\d\STM32CubeIDE\workspace_1.19.0\cmake_test:/workspace" stm32-cmake bash
+docker run --rm -it -v "C:\Users\d\Desktop\git\cmake_test_env:/workspace" stm32-cmake bash
 ```
 
 once in container, to build .elf
